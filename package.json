@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A payloadcms plugin to automatically translate documents.",
   "author": "Tim Hallyburton ",
-  "license": "MIT",
+  "license": "GPLv3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
