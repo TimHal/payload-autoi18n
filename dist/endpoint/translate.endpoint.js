@@ -42,10 +42,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var documentTranslator_1 = __importDefault(require("../core/documentTranslator"));
 var translationHandlerFactory = function (args) {
     return function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, sourceLocale, _i, _a, targetLocale;
-        var _b;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var id, sourceLocale;
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     id = req.query.id;
                     console.log(req);
@@ -54,20 +54,10 @@ var translationHandlerFactory = function (args) {
                         res.status(406).send();
                         return [2 /*return*/];
                     }
-                    sourceLocale = (_b = req.locale) !== null && _b !== void 0 ? _b : args.defaultLocale;
-                    _i = 0, _a = args.locales.filter(function (l) { return l !== sourceLocale; });
-                    _c.label = 1;
+                    sourceLocale = (_a = req.locale) !== null && _a !== void 0 ? _a : args.defaultLocale;
+                    return [4 /*yield*/, (0, documentTranslator_1.default)(id, args.collectionSlug, args.config, args.implementedVendor, sourceLocale, args.locales, args.overwriteTranslations, [])];
                 case 1:
-                    if (!(_i < _a.length)) return [3 /*break*/, 4];
-                    targetLocale = _a[_i];
-                    return [4 /*yield*/, (0, documentTranslator_1.default)(id, args.collectionSlug, args.config, args.implementedVendor, sourceLocale, targetLocale, args.overwriteTranslations, [])];
-                case 2:
-                    _c.sent();
-                    _c.label = 3;
-                case 3:
-                    _i++;
-                    return [3 /*break*/, 1];
-                case 4:
+                    _b.sent();
                     // translateDocument(id, args.collectionSlug, config, args.vendor, )
                     // check the auth constraints, if any
                     console.log("translating!");

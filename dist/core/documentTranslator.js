@@ -77,7 +77,7 @@ var errorHandler_1 = __importDefault(require("./errorHandler"));
  * @returns the updated document
  */
 var translateDocument = function (documentId, documentSlug, collectionConfig, vendor, sourceLocale, targetLocale, overwriteExistingTranslations, excludePaths) { return __awaiter(void 0, void 0, void 0, function () {
-    var translationPatch, document, _targetLocales, _i, _targetLocales_1, locale, _loop_1, _a, _b, field;
+    var translationPatch, document, test, _targetLocales, _i, _targetLocales_1, locale, targetDocument, _loop_1, _a, _b, field;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -86,59 +86,108 @@ var translateDocument = function (documentId, documentSlug, collectionConfig, ve
                         .findByID({
                         id: documentId,
                         collection: documentSlug,
-                        locale: "*",
+                        locale: sourceLocale,
                         showHiddenFields: true,
                         depth: 0,
                     })
                         .catch(errorHandler_1.default)];
             case 1:
                 document = _c.sent();
+                return [4 /*yield*/, payload_1.default.find({
+                        collection: documentSlug,
+                        locale: sourceLocale,
+                    })];
+            case 2:
+                test = _c.sent();
                 _targetLocales = Array.from(targetLocale).filter(function (l) { return l !== sourceLocale; });
                 if (_targetLocales.length === 0 || !sourceLocale)
                     return [2 /*return*/];
-                for (_i = 0, _targetLocales_1 = _targetLocales; _i < _targetLocales_1.length; _i++) {
-                    locale = _targetLocales_1[_i];
-                    _loop_1 = function (field) {
-                        // it is not possible to provide meaningful translations for relationship fields, ui fields
-                        // or some other data types - do not process those fields.
-                        // supported fields include any text fields or containers which include other (possibly translatable)
-                        // subfields.
-                        if (!types_1.supportedFieldTypes.includes(field.type))
-                            return "continue";
-                        // make sure this is a named field, otherwise it is not possible to resolve or update
-                        if (!Object.keys(field).includes("name"))
-                            return "continue";
-                        var currFieldName = field.name;
-                        var currFieldValue = document[currFieldName];
-                        // to determine how the field can be translated and updated we need to check it's config
-                        // if the config should not be available skip the translation
-                        var fieldConfig = collectionConfig.fields.find(function (cfg) { return cfg.name === currFieldName; });
-                        if (!fieldConfig)
-                            return "continue";
-                        // the patch for this current field
-                        translationPatch[currFieldName] = __assign(__assign({}, currFieldValue), { targetLocale: translateField({
-                                value: currFieldValue,
-                                field: fieldConfig,
-                                vendor: vendor,
-                                sourceLocale: sourceLocale,
-                                targetLocale: locale,
-                                overwriteExistingTranslations: overwriteExistingTranslations,
-                            }) });
-                    };
-                    for (_a = 0, _b = collectionConfig.fields; _a < _b.length; _a++) {
-                        field = _b[_a];
-                        _loop_1(field);
-                    }
-                }
+                _i = 0, _targetLocales_1 = _targetLocales;
+                _c.label = 3;
+            case 3:
+                if (!(_i < _targetLocales_1.length)) return [3 /*break*/, 11];
+                locale = _targetLocales_1[_i];
+                return [4 /*yield*/, payload_1.default.findByID({
+                        id: documentId,
+                        collection: documentSlug,
+                        locale: locale,
+                        showHiddenFields: true,
+                        depth: 0,
+                    })];
+            case 4:
+                targetDocument = _c.sent();
+                _loop_1 = function (field) {
+                    var currFieldName, currFieldValue, fieldConfig, _d, _e;
+                    return __generator(this, function (_f) {
+                        switch (_f.label) {
+                            case 0:
+                                // it is not possible to provide meaningful translations for relationship fields, ui fields
+                                // or some other data types - do not process those fields.
+                                // supported fields include any text fields or containers which include other (possibly translatable)
+                                // subfields.
+                                if (!types_1.supportedFieldTypes.includes(field.type))
+                                    return [2 /*return*/, "continue"];
+                                // make sure this is a named field, otherwise it is not possible to resolve or update
+                                if (!Object.keys(field).includes("name"))
+                                    return [2 /*return*/, "continue"];
+                                currFieldName = field.name;
+                                currFieldValue = document[currFieldName];
+                                fieldConfig = collectionConfig.fields.find(function (cfg) { return cfg.name === currFieldName; });
+                                if (!fieldConfig)
+                                    return [2 /*return*/, "continue"];
+                                if (!fieldConfig.name)
+                                    return [2 /*return*/, "continue"];
+                                // if it is a simple (top-level) translatable field and a value is given
+                                // on the target document we skip if overwrites are disabled
+                                if (overwriteExistingTranslations === false &&
+                                    types_1.translatableFieldTypes.includes(fieldConfig.type) &&
+                                    targetDocument[fieldConfig.name])
+                                    return [2 /*return*/, "continue"];
+                                // the patch for this current field
+                                _d = translationPatch;
+                                _e = currFieldName;
+                                return [4 /*yield*/, translateField({
+                                        value: currFieldValue,
+                                        field: fieldConfig,
+                                        vendor: vendor,
+                                        sourceLocale: sourceLocale,
+                                        targetLocale: locale,
+                                        overwriteExistingTranslations: overwriteExistingTranslations,
+                                    })];
+                            case 1:
+                                // the patch for this current field
+                                _d[_e] = _f.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                };
+                _a = 0, _b = collectionConfig.fields;
+                _c.label = 5;
+            case 5:
+                if (!(_a < _b.length)) return [3 /*break*/, 8];
+                field = _b[_a];
+                return [5 /*yield**/, _loop_1(field)];
+            case 6:
+                _c.sent();
+                _c.label = 7;
+            case 7:
+                _a++;
+                return [3 /*break*/, 5];
+            case 8:
                 console.log(translationPatch);
                 return [4 /*yield*/, payload_1.default.update({
                         id: documentId,
+                        locale: locale,
                         collection: documentSlug,
                         data: translationPatch,
                     })];
-            case 2: 
-            // finally, apply the translation patch to the object
+            case 9: 
+            // finally, apply the translation patch to the object for the current locale
             return [2 /*return*/, _c.sent()];
+            case 10:
+                _i++;
+                return [3 /*break*/, 3];
+            case 11: return [2 /*return*/];
         }
     });
 }); };

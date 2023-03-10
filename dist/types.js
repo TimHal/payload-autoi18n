@@ -13,7 +13,13 @@ exports.supportedFieldTypes = exports.traversableFieldTypes = exports.translatab
 // fields which can be directly translated
 exports.translatableFieldTypes = ["text", "textarea", "richText"];
 // fields which can be recursively traversed
-exports.traversableFieldTypes = ["group", "array", "tabs"];
+exports.traversableFieldTypes = [
+    "group",
+    "array",
+    "tabs",
+    "collapsible",
+    "row",
+];
 // all supported field types combined
 exports.supportedFieldTypes = __spreadArray(__spreadArray([], exports.translatableFieldTypes, true), exports.traversableFieldTypes, true);
 //# sourceMappingURL=types.js.map

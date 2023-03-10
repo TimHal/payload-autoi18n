@@ -43,6 +43,7 @@ var DeeplVendor = /** @class */ (function () {
     DeeplVendor.prototype.translate = function (text, sourceLocale, targetLocale) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                console.log("deepl[translating (".concat(sourceLocale, " - ").concat(targetLocale, ")]: ").concat(text, " "));
                 return [2 /*return*/, "foo"];
             });
         });
