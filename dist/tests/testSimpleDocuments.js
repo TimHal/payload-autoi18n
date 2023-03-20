@@ -35,65 +35,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-var payload_1 = __importDefault(require("payload"));
-var payload_config_1 = require("./configs/simple/payload-config");
-describe("AutoI18n Plugin Tests", function () {
-    beforeAll(function () { return __awaiter(void 0, void 0, void 0, function () {
-        var app;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    process.env["PAYLOAD_CONFIG_PATH"] =
-                        "src/tests/configs/simple/payload-config.ts";
-                    app = (0, express_1.default)();
-                    return [4 /*yield*/, payload_1.default.init({
-                            express: app,
-                            secret: "SECRET",
-                            local: true,
-                            mongoURL: false,
-                            onInit: function () {
-                                console.log("Loaded simple test cfg");
-                                // console.log(payload.getAPIURL())
-                            },
-                        })];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    }); });
-    it("Should load", function () { return __awaiter(void 0, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            expect(1).toBe(1);
-            return [2 /*return*/];
-        });
-    }); });
-    it("Should translate a simple entity", function () { return __awaiter(void 0, void 0, void 0, function () {
-        var input, res;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    input = {
-                        text: "foo",
-                    };
-                    console.log(payload_1.default);
-                    return [4 /*yield*/, payload_1.default.create({
-                            collection: payload_config_1.simpleCollectionSlug,
-                            data: input,
-                            overrideAccess: true,
-                        })];
-                case 1:
-                    res = _a.sent();
-                    console.log(res);
-                    expect(1).toBe(1);
-                    return [2 /*return*/];
-            }
-        });
-    }); });
+describe("Test translation of simple documents", function () {
+    beforeAll(function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+        return [2 /*return*/];
+    }); }); });
 });
-//# sourceMappingURL=plugin.spec.js.map
+//# sourceMappingURL=testSimpleDocuments.js.map

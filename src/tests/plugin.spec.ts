@@ -1,43 +1,55 @@
-import express from "express";
+import express, { application } from "express";
 import payload from "payload";
 import { simpleCollectionSlug } from "./configs/simple/payload-config";
-describe('AutoI18n Plugin Tests', () => {
+import { MongoMemoryServer } from "mongodb-memory-server";
 
+describe("AutoI18n Plugin Tests", () => {
   beforeAll(async () => {
+    process.env["PAYLOAD_CONFIG_PATH"] =
+      "src/tests/configs/simple/payload-config.ts";
 
-    process.env['PAYLOAD_CONFIG_PATH'] = 'src/tests/configs/simple/payload-config.ts';
     const app = express();
+    app.listen(3000);
+    const mongod = await MongoMemoryServer.create();
+    const uri = mongod.getUri();
 
     await payload.init({
+      secret: "SECRET",
       express: app,
-      secret: 'SECRET',
-      local: true,
-      mongoURL: false,
-      onInit: () => {
-        console.log('Loaded simple test cfg');
-        // console.log(payload.getAPIURL())
-      }
+      mongoURL: uri,
     });
-  })
+  });
 
-  it('Should load', async () => {
-    expect(1).toBe(1);
-  })
-
-  it('Should translate a simple entity', async () => {
-
+  it("Should translate a simple entity", async () => {
     const input = {
-      text: 'foo',
-    }
+      text: "foo",
+    };
 
-    const res = await payload.create({
+    const expected_text = {
+      de: "foo",
+      en: "FOO",
+      es: "FOO",
+    };
+
+    console.log(payload);
+
+    const id = (
+      await payload.create({
+        collection: simpleCollectionSlug,
+        data: input,
+        locale: "de",
+        overrideAccess: true,
+      })
+    ).id;
+
+    const res = await payload.findByID({
       collection: simpleCollectionSlug,
-      data: input,
-      overrideAccess: true,
+      id: id,
+      locale: "all",
     });
 
     console.log(res);
 
     expect(1).toBe(1);
-  })
-})
+  });
+});
