@@ -53,8 +53,6 @@ const translationHandlerFactory = (
       []
     );
 
-    // translateDocument(id, args.collectionSlug, config, args.vendor, )
-
     // check the auth constraints, if any
     console.log("translating!");
     res.status(200).send({ status: "ok" });

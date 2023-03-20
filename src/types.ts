@@ -4,9 +4,6 @@ import { PayloadRequest } from "payload/dist/types";
 // aliasing for clarification
 export type locale = string;
 
-// vendors provided by this plugin (adding google.translate and chatgpt eventually)
-export type builtinVendors = "deepl";
-
 // fields which can be directly translated
 export const translatableFieldTypes = ["text", "textarea", "richText"];
 // fields which can be recursively traversed
@@ -27,12 +24,9 @@ export type OverrideConfig = {
   endpointName: string;
 };
 
-// TODO: this is not correct
-type customVendor = (...args: any[]) => TranslationVendor;
-
 export type AutoI18nConfig = {
   // The translation service/vendor to use. Defaults to `deepl`
-  vendor: builtinVendors;
+  vendor: TranslationVendor;
 
   // If set to `true` will override the entries
   overwriteTranslations: boolean;
