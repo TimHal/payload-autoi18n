@@ -1,5 +1,10 @@
 import { Config } from "payload/config";
 import { AutoI18nConfig } from "./types";
+import { DeeplVendor } from "./vendors/deepl";
+/**
+  * Export default vendors
+*/
+export { DeeplVendor };
 /**
  *
  * @param _incomingAutoI18nConfig

@@ -23,8 +23,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DeeplVendor = void 0;
 var translate_endpoint_1 = __importDefault(require("./endpoint/translate.endpoint"));
 var deepl_1 = require("./vendors/deepl");
+Object.defineProperty(exports, "DeeplVendor", { enumerable: true, get: function () { return deepl_1.DeeplVendor; } });
 /**
  *
  * @param _incomingAutoI18nConfig
@@ -48,6 +50,7 @@ var autoI18nPlugin = function (_incomingAutoI18nConfig) {
                 if (!collectionConfig) {
                     throw new Error("Unable to resolve config for ".concat(collection.slug));
                 }
+                console.log("Setting up translation endpoint for ".concat(collectionConfig.slug));
                 var translationEndpoint = {
                     path: "/:id/translate",
                     method: "post",

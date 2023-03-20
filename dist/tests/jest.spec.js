@@ -35,36 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var documentTranslator_1 = __importDefault(require("../core/documentTranslator"));
-var translationHandlerFactory = function (args) {
-    return function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, sourceLocale;
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    id = req.query.id;
-                    console.log(req);
-                    console.log(req.query);
-                    if (!id) {
-                        res.status(406).send();
-                        return [2 /*return*/];
-                    }
-                    sourceLocale = (_a = req.locale) !== null && _a !== void 0 ? _a : args.defaultLocale;
-                    return [4 /*yield*/, (0, documentTranslator_1.default)(id, args.collectionSlug, args.config, args.implementedVendor, sourceLocale, args.locales, args.overwriteTranslations, [])];
-                case 1:
-                    _b.sent();
-                    // check the auth constraints, if any
-                    console.log("translating!");
-                    res.status(200).send({ status: "ok" });
-                    return [2 /*return*/];
-            }
+describe("Jest", function () {
+    it("Should run jest", function () { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            expect(1).toBe(1);
+            return [2 /*return*/];
         });
-    }); };
-};
-exports.default = translationHandlerFactory;
-//# sourceMappingURL=translate.endpoint.js.map
+    }); });
+});
+//# sourceMappingURL=jest.spec.js.map

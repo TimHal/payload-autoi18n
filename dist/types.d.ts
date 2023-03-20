@@ -1,7 +1,6 @@
 import { Field } from "payload/dist/fields/config/types";
 import { PayloadRequest } from "payload/dist/types";
 export type locale = string;
-export type builtinVendors = "deepl";
 export declare const translatableFieldTypes: string[];
 export declare const traversableFieldTypes: string[];
 export declare const supportedFieldTypes: string[];
@@ -9,7 +8,7 @@ export type OverrideConfig = {
     endpointName: string;
 };
 export type AutoI18nConfig = {
-    vendor: builtinVendors;
+    vendor: TranslationVendor;
     overwriteTranslations: boolean;
     synchronize: boolean;
     localeAlias?: Record<string, string>;

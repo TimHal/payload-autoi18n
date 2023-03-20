@@ -39,32 +39,59 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var documentTranslator_1 = __importDefault(require("../core/documentTranslator"));
-var translationHandlerFactory = function (args) {
-    return function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, sourceLocale;
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+var express_1 = __importDefault(require("express"));
+var payload_1 = __importDefault(require("payload"));
+describe('AutoI18n Plugin Tests', function () {
+    beforeAll(function () { return __awaiter(void 0, void 0, void 0, function () {
+        var app;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
-                    id = req.query.id;
-                    console.log(req);
-                    console.log(req.query);
-                    if (!id) {
-                        res.status(406).send();
-                        return [2 /*return*/];
-                    }
-                    sourceLocale = (_a = req.locale) !== null && _a !== void 0 ? _a : args.defaultLocale;
-                    return [4 /*yield*/, (0, documentTranslator_1.default)(id, args.collectionSlug, args.config, args.implementedVendor, sourceLocale, args.locales, args.overwriteTranslations, [])];
+                    process.env['PAYLOAD_CONFIG_PATH'] = 'src/tests/configs/simple/payload-config.ts';
+                    app = (0, express_1.default)();
+                    app.listen(3000);
+                    return [4 /*yield*/, payload_1.default.init({
+                            express: app,
+                            secret: 'SECRET',
+                            mongoURL: false,
+                            onInit: function () {
+                                console.log('Loaded simple test cfg');
+                                console.log(payload_1.default.getAPIURL());
+                            }
+                        })];
                 case 1:
-                    _b.sent();
-                    // check the auth constraints, if any
-                    console.log("translating!");
-                    res.status(200).send({ status: "ok" });
+                    _a.sent();
                     return [2 /*return*/];
             }
         });
-    }); };
-};
-exports.default = translationHandlerFactory;
-//# sourceMappingURL=translate.endpoint.js.map
+    }); }, 10000);
+    it('Should load', function () { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            expect(1).toBe(1);
+            return [2 /*return*/];
+        });
+    }); });
+    it('Should translate a simple entity', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var input, res;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    input = {
+                        text: 'foo',
+                    };
+                    return [4 /*yield*/, payload_1.default.create({
+                            collection: 'simpleCollection',
+                            data: input,
+                            overrideAccess: false,
+                            locale: 'en'
+                        })];
+                case 1:
+                    res = _a.sent();
+                    console.log(res);
+                    expect(1).toBe(1);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+});
+//# sourceMappingURL=plugin.spec.js.map
