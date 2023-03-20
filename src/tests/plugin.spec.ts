@@ -43,7 +43,7 @@ describe("AutoI18n Plugin Tests", () => {
     ).id;
 
     // query the translation endpoint
-    const r = await fetch(
+    await fetch(
       `http://localhost:3000/api/${simpleCollectionSlug}/${id}/translate?locale=de&id=${id}`,
       {
         method: "post",
@@ -56,8 +56,6 @@ describe("AutoI18n Plugin Tests", () => {
       locale: "all",
     });
 
-    console.log(res);
-
-    expect(1).toBe(1);
+    expect(res["text"]).toMatchObject(expected_text);
   });
 });

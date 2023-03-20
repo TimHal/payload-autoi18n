@@ -67,6 +67,8 @@ const translateDocument = async (
   );
   if (_targetLocales.length === 0 || !sourceLocale) return;
 
+  console.log(_targetLocales);
+
   for (const locale of _targetLocales) {
     /**
      * Fetch the target document to prevent overriding values (if applicable).
@@ -132,7 +134,7 @@ const translateDocument = async (
     console.log(translationPatch);
 
     // finally, apply the translation patch to the object for the current locale
-    return await payload.update({
+    await payload.update({
       id: documentId,
       locale: locale,
       collection: documentSlug,
@@ -162,22 +164,20 @@ const translateField = async (args: TranslationArgs) => {
   // if this is a directly translatable field, return the vendor's result
   if (translatableFieldTypes.includes(field.type)) {
     console.log(value);
-    if (!value || !value[sourceLocale]) return undefined;
-    if (overwriteExistingTranslations === false && value[targetLocale])
-      return value[targetLocale];
+    if (!value) return undefined;
 
     switch (field.type) {
       case "text":
-        return await translateTextField({ ...args, text: value[sourceLocale] });
+        return await translateTextField({ ...args, text: value });
       case "textarea":
         return await translateTextareaField({
           ...args,
-          text: value[sourceLocale],
+          text: value,
         });
       case "richText":
         return await translateRichtextField({
           ...args,
-          node: value[sourceLocale],
+          node: value,
         });
       default:
         // this should never happen as the switch-cases fully matches `translatableFields`

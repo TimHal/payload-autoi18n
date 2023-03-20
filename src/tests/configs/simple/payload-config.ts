@@ -19,12 +19,12 @@ export default buildConfig({
   collections: [
     {
       slug: simpleCollectionSlug,
-      access: {
-        create: () => true,
-        read: () => true,
-        update: () => true,
-        delete: () => true,
-      },
+      // access: {
+      //   create: () => true,
+      //   read: () => true,
+      //   update: () => true,
+      //   delete: () => true,
+      // },
 
       fields: [
         {
@@ -32,24 +32,17 @@ export default buildConfig({
           type: "text",
           localized: true,
         },
-        // {
-        //   name: "richText",
-        //   type: "richText",
-        //   localized: true,
-        //   required: false,
-        // },
+        {
+          name: "richText",
+          type: "richText",
+          localized: true,
+          required: false,
+        },
       ],
     },
   ],
 
   plugins: [
-    //   autoI18nPlugin({
-    //     collections: ["simpleCollection"],
-    //     vendor: new DeeplVendor(),
-    //     overwriteTranslations: false,
-    //     auth: () => true,
-    //     synchronize: false,
-    //   }),
     autoI18nPlugin({
       collections: ["simpleCollection"],
       vendor: new CapitalTranslator(),
