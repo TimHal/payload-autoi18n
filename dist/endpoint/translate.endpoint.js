@@ -42,19 +42,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var documentTranslator_1 = __importDefault(require("../core/documentTranslator"));
 var translationHandlerFactory = function (args) {
     return function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-        var id, sourceLocale;
-        var _a;
+        var _a, id, locale, sourceLocale;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    id = req.query.id;
-                    console.log(req);
+                    _a = req.query, id = _a.id, locale = _a.locale;
                     console.log(req.query);
                     if (!id) {
                         res.status(406).send();
                         return [2 /*return*/];
                     }
-                    sourceLocale = (_a = req.locale) !== null && _a !== void 0 ? _a : args.defaultLocale;
+                    sourceLocale = locale !== null && locale !== void 0 ? locale : args.defaultLocale;
                     return [4 /*yield*/, (0, documentTranslator_1.default)(id, args.collectionSlug, args.config, args.implementedVendor, sourceLocale, args.locales, args.overwriteTranslations, [])];
                 case 1:
                     _b.sent();

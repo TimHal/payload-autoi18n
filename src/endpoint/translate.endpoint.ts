@@ -32,15 +32,15 @@ const translationHandlerFactory = (
   }
 ) => {
   return async (req: PayloadRequest, res: Response, next: NextFunction) => {
-    const { id } = req.query;
-    console.log(req);
+    const { id, locale } = req.query;
+
     console.log(req.query);
     if (!id) {
       res.status(406).send();
       return;
     }
 
-    const sourceLocale = req.locale ?? args.defaultLocale;
+    const sourceLocale = locale ?? args.defaultLocale;
 
     await translateDocument(
       id as string,

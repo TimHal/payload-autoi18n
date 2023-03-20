@@ -77,29 +77,41 @@ var errorHandler_1 = __importDefault(require("./errorHandler"));
  * @returns the updated document
  */
 var translateDocument = function (documentId, documentSlug, collectionConfig, vendor, sourceLocale, targetLocale, overwriteExistingTranslations, excludePaths) { return __awaiter(void 0, void 0, void 0, function () {
-    var translationPatch, document, _targetLocales, _i, _targetLocales_1, locale, targetDocument, _loop_1, _a, _b, field;
-    return __generator(this, function (_c) {
-        switch (_c.label) {
+    var translationPatch, document, _a, _b, _targetLocales, _i, _targetLocales_1, locale, targetDocument, _loop_1, _c, _d, field;
+    return __generator(this, function (_e) {
+        switch (_e.label) {
             case 0:
                 translationPatch = {};
+                console.log(sourceLocale);
                 return [4 /*yield*/, payload_1.default
                         .findByID({
                         id: documentId,
                         collection: documentSlug,
                         locale: sourceLocale,
-                        showHiddenFields: true,
-                        depth: 0,
+                        // showHiddenFields: true,
+                        overrideAccess: true,
                     })
                         .catch(errorHandler_1.default)];
             case 1:
-                document = _c.sent();
+                document = _e.sent();
+                console.log(document);
+                _b = (_a = console).log;
+                return [4 /*yield*/, payload_1.default.findByID({
+                        id: documentId,
+                        collection: documentSlug,
+                        locale: "all",
+                        // showHiddenFields: true,
+                        overrideAccess: true,
+                    })];
+            case 2:
+                _b.apply(_a, [_e.sent()]);
                 _targetLocales = Array.from(targetLocale).filter(function (l) { return l !== sourceLocale; });
                 if (_targetLocales.length === 0 || !sourceLocale)
                     return [2 /*return*/];
                 _i = 0, _targetLocales_1 = _targetLocales;
-                _c.label = 2;
-            case 2:
-                if (!(_i < _targetLocales_1.length)) return [3 /*break*/, 10];
+                _e.label = 3;
+            case 3:
+                if (!(_i < _targetLocales_1.length)) return [3 /*break*/, 11];
                 locale = _targetLocales_1[_i];
                 return [4 /*yield*/, payload_1.default.findByID({
                         id: documentId,
@@ -108,10 +120,10 @@ var translateDocument = function (documentId, documentSlug, collectionConfig, ve
                         showHiddenFields: true,
                         depth: 0,
                     })];
-            case 3:
-                targetDocument = _c.sent();
+            case 4:
+                targetDocument = _e.sent();
                 _loop_1 = function (field) {
-                    var currFieldName, currFieldValue, fieldConfig, _d, _e;
+                    var currFieldName, currFieldValue, fieldConfig, translationResult;
                     return __generator(this, function (_f) {
                         switch (_f.label) {
                             case 0:
@@ -137,9 +149,6 @@ var translateDocument = function (documentId, documentSlug, collectionConfig, ve
                                     types_1.translatableFieldTypes.includes(fieldConfig.type) &&
                                     targetDocument[fieldConfig.name])
                                     return [2 /*return*/, "continue"];
-                                // the patch for this current field
-                                _d = translationPatch;
-                                _e = currFieldName;
                                 return [4 /*yield*/, translateField({
                                         value: currFieldValue,
                                         field: fieldConfig,
@@ -149,25 +158,28 @@ var translateDocument = function (documentId, documentSlug, collectionConfig, ve
                                         overwriteExistingTranslations: overwriteExistingTranslations,
                                     })];
                             case 1:
-                                // the patch for this current field
-                                _d[_e] = _f.sent();
+                                translationResult = _f.sent();
+                                if (translationResult) {
+                                    // the patch for this current field
+                                    translationPatch[currFieldName] = translationResult;
+                                }
                                 return [2 /*return*/];
                         }
                     });
                 };
-                _a = 0, _b = collectionConfig.fields;
-                _c.label = 4;
-            case 4:
-                if (!(_a < _b.length)) return [3 /*break*/, 7];
-                field = _b[_a];
-                return [5 /*yield**/, _loop_1(field)];
+                _c = 0, _d = collectionConfig.fields;
+                _e.label = 5;
             case 5:
-                _c.sent();
-                _c.label = 6;
+                if (!(_c < _d.length)) return [3 /*break*/, 8];
+                field = _d[_c];
+                return [5 /*yield**/, _loop_1(field)];
             case 6:
-                _a++;
-                return [3 /*break*/, 4];
+                _e.sent();
+                _e.label = 7;
             case 7:
+                _c++;
+                return [3 /*break*/, 5];
+            case 8:
                 console.log(translationPatch);
                 return [4 /*yield*/, payload_1.default.update({
                         id: documentId,
@@ -175,13 +187,13 @@ var translateDocument = function (documentId, documentSlug, collectionConfig, ve
                         collection: documentSlug,
                         data: translationPatch,
                     })];
-            case 8: 
+            case 9: 
             // finally, apply the translation patch to the object for the current locale
-            return [2 /*return*/, _c.sent()];
-            case 9:
+            return [2 /*return*/, _e.sent()];
+            case 10:
                 _i++;
-                return [3 /*break*/, 2];
-            case 10: return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 11: return [2 /*return*/];
         }
     });
 }); };
@@ -200,6 +212,7 @@ var translateField = function (args) { return __awaiter(void 0, void 0, void 0, 
             case 0:
                 value = args.value, field = args.field, vendor = args.vendor, sourceLocale = args.sourceLocale, targetLocale = args.targetLocale, overwriteExistingTranslations = args.overwriteExistingTranslations;
                 if (!types_1.translatableFieldTypes.includes(field.type)) return [3 /*break*/, 8];
+                console.log(value);
                 if (!value || !value[sourceLocale])
                     return [2 /*return*/, undefined];
                 if (overwriteExistingTranslations === false && value[targetLocale])

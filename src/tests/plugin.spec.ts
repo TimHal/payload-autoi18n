@@ -31,16 +31,24 @@ describe("AutoI18n Plugin Tests", () => {
       es: "FOO",
     };
 
-    console.log(payload);
-
     const id = (
       await payload.create({
         collection: simpleCollectionSlug,
-        data: input,
+        data: {
+          text: "foo",
+        },
         locale: "de",
         overrideAccess: true,
       })
     ).id;
+
+    // query the translation endpoint
+    const r = await fetch(
+      `http://localhost:3000/api/${simpleCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+      {
+        method: "post",
+      }
+    );
 
     const res = await payload.findByID({
       collection: simpleCollectionSlug,

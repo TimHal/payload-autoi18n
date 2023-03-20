@@ -32,17 +32,30 @@ export default buildConfig({
           type: "text",
           localized: true,
         },
-        {
-          name: "richText",
-          type: "richText",
-          localized: true,
-        },
+        // {
+        //   name: "richText",
+        //   type: "richText",
+        //   localized: true,
+        //   required: false,
+        // },
       ],
     },
   ],
 
   plugins: [
-    // autoI18nPlugin({ collections: ['simpleCollection'], vendor: new DeeplVendor(), overwriteTranslations: false, auth: () => true, synchronize: false })
-    // autoI18nPlugin({ collections: ['simpleCollection'], vendor: new CapitalTranslator(), overwriteTranslations: false, auth: () => true, synchronize: false })
+    //   autoI18nPlugin({
+    //     collections: ["simpleCollection"],
+    //     vendor: new DeeplVendor(),
+    //     overwriteTranslations: false,
+    //     auth: () => true,
+    //     synchronize: false,
+    //   }),
+    autoI18nPlugin({
+      collections: ["simpleCollection"],
+      vendor: new CapitalTranslator(),
+      overwriteTranslations: false,
+      auth: () => true,
+      synchronize: false,
+    }),
   ],
 });

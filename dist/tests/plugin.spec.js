@@ -42,52 +42,66 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var payload_1 = __importDefault(require("payload"));
 var payload_config_1 = require("./configs/simple/payload-config");
+var mongodb_memory_server_1 = require("mongodb-memory-server");
 describe("AutoI18n Plugin Tests", function () {
     beforeAll(function () { return __awaiter(void 0, void 0, void 0, function () {
-        var app;
+        var app, mongod, uri;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     process.env["PAYLOAD_CONFIG_PATH"] =
                         "src/tests/configs/simple/payload-config.ts";
                     app = (0, express_1.default)();
-                    return [4 /*yield*/, payload_1.default.init({
-                            express: app,
-                            secret: "SECRET",
-                            local: true,
-                            mongoURL: false,
-                            onInit: function () {
-                                console.log("Loaded simple test cfg");
-                                // console.log(payload.getAPIURL())
-                            },
-                        })];
+                    app.listen(3000);
+                    return [4 /*yield*/, mongodb_memory_server_1.MongoMemoryServer.create()];
                 case 1:
+                    mongod = _a.sent();
+                    uri = mongod.getUri();
+                    return [4 /*yield*/, payload_1.default.init({
+                            secret: "SECRET",
+                            express: app,
+                            mongoURL: uri,
+                        })];
+                case 2:
                     _a.sent();
                     return [2 /*return*/];
             }
         });
     }); });
-    it("Should load", function () { return __awaiter(void 0, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            expect(1).toBe(1);
-            return [2 /*return*/];
-        });
-    }); });
     it("Should translate a simple entity", function () { return __awaiter(void 0, void 0, void 0, function () {
-        var input, res;
+        var input, expected_text, id, r, res;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     input = {
                         text: "foo",
                     };
-                    console.log(payload_1.default);
+                    expected_text = {
+                        de: "foo",
+                        en: "FOO",
+                        es: "FOO",
+                    };
                     return [4 /*yield*/, payload_1.default.create({
                             collection: payload_config_1.simpleCollectionSlug,
-                            data: input,
+                            data: {
+                                text: "foo",
+                            },
+                            locale: "de",
                             overrideAccess: true,
                         })];
                 case 1:
+                    id = (_a.sent()).id;
+                    return [4 /*yield*/, fetch("http://localhost:3000/api/".concat(payload_config_1.simpleCollectionSlug, "/").concat(id, "/translate?locale=\"de\"&id=").concat(id), {
+                            method: "post",
+                        })];
+                case 2:
+                    r = _a.sent();
+                    return [4 /*yield*/, payload_1.default.findByID({
+                            collection: payload_config_1.simpleCollectionSlug,
+                            id: id,
+                            locale: "all",
+                        })];
+                case 3:
                     res = _a.sent();
                     console.log(res);
                     expect(1).toBe(1);

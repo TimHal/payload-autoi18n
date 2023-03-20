@@ -45,7 +45,7 @@ var autoI18nPlugin = function (_incomingAutoI18nConfig) {
         var defaultLocale = config.localization.defaultLocale;
         var _deepl = new deepl_1.DeeplVendor();
         var mergedConfig = __assign(__assign({}, config), { collections: (_a = config.collections) === null || _a === void 0 ? void 0 : _a.map(function (collection) {
-                var _a, _b;
+                var _a, _b, _c;
                 var collectionConfig = (_a = config.collections) === null || _a === void 0 ? void 0 : _a.find(function (c) { return c.slug === collection.slug; });
                 if (!collectionConfig) {
                     throw new Error("Unable to resolve config for ".concat(collection.slug));
@@ -55,9 +55,9 @@ var autoI18nPlugin = function (_incomingAutoI18nConfig) {
                     path: "/:id/translate",
                     method: "post",
                     root: false,
-                    handler: (0, translate_endpoint_1.default)(__assign(__assign({}, _incomingAutoI18nConfig), { config: collectionConfig, implementedVendor: _deepl, collectionSlug: collection.slug, locales: locales, defaultLocale: defaultLocale })),
+                    handler: (0, translate_endpoint_1.default)(__assign(__assign({}, _incomingAutoI18nConfig), { config: collectionConfig, implementedVendor: (_b = _incomingAutoI18nConfig.vendor) !== null && _b !== void 0 ? _b : _deepl, collectionSlug: collection.slug, locales: locales, defaultLocale: defaultLocale })),
                 };
-                return __assign(__assign({}, collection), { endpoints: __spreadArray(__spreadArray([], ((_b = collection.endpoints) !== null && _b !== void 0 ? _b : []), true), [translationEndpoint], false) });
+                return __assign(__assign({}, collection), { endpoints: __spreadArray(__spreadArray([], ((_c = collection.endpoints) !== null && _c !== void 0 ? _c : []), true), [translationEndpoint], false) });
             }) });
         return mergedConfig;
     };

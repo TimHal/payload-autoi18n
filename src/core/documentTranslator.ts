@@ -47,6 +47,7 @@ const translateDocument = async (
   // this object keeps the records to update in the final step
   const translationPatch: Record<string, any> = {};
 
+  console.log(sourceLocale);
   // get the original doc. `showHiddenFields = true` is a sensible default, because undesired
   // fields can be ommited using `excludePaths`.
   const document = await payload
@@ -54,8 +55,8 @@ const translateDocument = async (
       id: documentId,
       collection: documentSlug,
       locale: sourceLocale,
-      showHiddenFields: true,
-      depth: 0,
+      // showHiddenFields: true,
+      overrideAccess: true,
     })
     .catch(handleAndRethrow);
 
@@ -113,8 +114,7 @@ const translateDocument = async (
       )
         continue;
 
-      // the patch for this current field
-      translationPatch[currFieldName] = await translateField({
+      const translationResult = await translateField({
         value: currFieldValue,
         field: fieldConfig,
         vendor: vendor,
@@ -122,6 +122,11 @@ const translateDocument = async (
         targetLocale: locale,
         overwriteExistingTranslations: overwriteExistingTranslations,
       });
+
+      if (translationResult) {
+        // the patch for this current field
+        translationPatch[currFieldName] = translationResult;
+      }
     }
 
     console.log(translationPatch);
@@ -156,6 +161,7 @@ const translateField = async (args: TranslationArgs) => {
 
   // if this is a directly translatable field, return the vendor's result
   if (translatableFieldTypes.includes(field.type)) {
+    console.log(value);
     if (!value || !value[sourceLocale]) return undefined;
     if (overwriteExistingTranslations === false && value[targetLocale])
       return value[targetLocale];
