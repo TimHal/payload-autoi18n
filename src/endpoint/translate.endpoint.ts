@@ -34,7 +34,6 @@ const translationHandlerFactory = (
   return async (req: PayloadRequest, res: Response, next: NextFunction) => {
     const { id, locale } = req.query;
 
-    console.log(req.query);
     if (!id) {
       res.status(406).send();
       return;
@@ -54,7 +53,6 @@ const translationHandlerFactory = (
     );
 
     // check the auth constraints, if any
-    console.log("translating!");
     res.status(200).send({ status: "ok" });
   };
 };

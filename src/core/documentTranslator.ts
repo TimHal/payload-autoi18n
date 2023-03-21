@@ -47,7 +47,6 @@ const translateDocument = async (
   // this object keeps the records to update in the final step
   const translationPatch: Record<string, any> = {};
 
-  console.log(sourceLocale);
   // get the original doc. `showHiddenFields = true` is a sensible default, because undesired
   // fields can be ommited using `excludePaths`.
   const document = await payload
@@ -66,8 +65,6 @@ const translateDocument = async (
     (l) => l !== sourceLocale
   );
   if (_targetLocales.length === 0 || !sourceLocale) return;
-
-  console.log(_targetLocales);
 
   for (const locale of _targetLocales) {
     /**
@@ -131,8 +128,6 @@ const translateDocument = async (
       }
     }
 
-    console.log(translationPatch);
-
     // finally, apply the translation patch to the object for the current locale
     await payload.update({
       id: documentId,
@@ -163,7 +158,6 @@ const translateField = async (args: TranslationArgs) => {
 
   // if this is a directly translatable field, return the vendor's result
   if (translatableFieldTypes.includes(field.type)) {
-    console.log(value);
     if (!value) return undefined;
 
     switch (field.type) {
@@ -181,11 +175,24 @@ const translateField = async (args: TranslationArgs) => {
         });
       default:
         // this should never happen as the switch-cases fully matches `translatableFields`
-        break;
+        throw new Error(
+          `Undefined 'translatableField': ${field.type} - aborting!`
+        );
     }
   }
   //
   if (traversableFieldTypes.includes(field.type)) {
+    switch (field.type) {
+      case "tabs":
+        return "";
+
+      default:
+        // this should never happen as the switch-cases fully matches `traversableFields`
+        throw new Error(
+          `Undefined 'traversableFields': ${field.type} - aborting!`
+        );
+        break;
+    }
   }
 };
 
