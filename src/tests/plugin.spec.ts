@@ -1,7 +1,6 @@
 import express, { application } from "express";
 import payload from "payload";
 import { simpleCollectionSlug } from "./configs/simple/payload-config";
-import { MongoMemoryServer } from "mongodb-memory-server";
 
 describe("AutoI18n Plugin Tests", () => {
   beforeAll(async () => {
@@ -10,14 +9,15 @@ describe("AutoI18n Plugin Tests", () => {
 
     const app = express();
     app.listen(3000);
-    const mongod = await MongoMemoryServer.create();
-    const uri = mongod.getUri();
+    if (process.env["MONGO_URL"]) {
+      console.log(`Running in docker mode ${process.env["MONGO_URL"]}`)
+      await payload.init({
+        secret: "SECRET",
+        express: app,
+        mongoURL: process.env["MONGO_URL"],
+      })
+    }
 
-    await payload.init({
-      secret: "SECRET",
-      express: app,
-      mongoURL: uri,
-    });
   });
 
   it("Should translate a simple entity", async () => {
