@@ -8,8 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "cross-env NODE_ENV=test jest --forceExit --detectOpenHandles",
-    "test:docker": "cross-env NODE_ENV=development MONGO_URL='mongodb://root:root@localhost:27017/'  jest --forceExit --detectOpenHandles"
+    "test": "cross-env NODE_ENV=test jest --forceExit --detectOpenHandles"
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",
@@ -24,6 +23,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "mongodb-memory-server": "^8.12.1"
   }
 }
