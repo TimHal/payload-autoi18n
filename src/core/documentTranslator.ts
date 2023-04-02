@@ -45,7 +45,7 @@ const translateDocument = async (
   excludePaths?: string[]
 ) => {
   // this object keeps the records to update in the final step
-  const translationPatch: Record<string, any> = {};
+  let translationPatch: Record<string, any> = {};
 
   // get the original doc. `showHiddenFields = true` is a sensible default, because undesired
   // fields can be ommited using `excludePaths`.
@@ -89,33 +89,18 @@ const translateDocument = async (
       // subfields.
       if (!supportedFieldTypes.includes(field.type)) continue;
 
-      // make sure this is a named field, otherwise it is not possible to resolve or update
-      if (!Object.keys(field).includes("name")) continue;
-
-      const currFieldName: string = (field as any & { name: string }).name;
-      const currFieldValue = document[currFieldName];
-
-      // to determine how the field can be translated and updated we need to check it's config
-      // if the config should not be available skip the translation
-      const fieldConfig: Field & { name: string } & any =
-        collectionConfig.fields.find(
-          (cfg: any & { name: string }) => cfg.name === currFieldName
-        );
-      if (!fieldConfig) continue;
-      if (!fieldConfig.name) continue;
-
-      // if it is a simple (top-level) translatable field and a value is given
-      // on the target document we skip if overwrites are disabled
-      if (
-        overwriteExistingTranslations === false &&
-        translatableFieldTypes.includes(fieldConfig.type) &&
-        targetDocument[fieldConfig.name]
-      )
-        continue;
+      // check if the field is named and values are scoped
+      const currFieldName: string =
+        (field as any & { name: string }).name ?? undefined;
+      const currFieldValue = currFieldName ? document[currFieldName] : document;
+      const targetFieldValue = currFieldName
+        ? targetDocument[currFieldName]
+        : targetDocument;
 
       const translationResult = await translateField({
         value: currFieldValue,
-        field: fieldConfig,
+        targetValue: targetFieldValue,
+        field: field,
         vendor: vendor,
         sourceLocale: sourceLocale,
         targetLocale: locale,
@@ -124,10 +109,11 @@ const translateDocument = async (
 
       if (translationResult) {
         // the patch for this current field
-        translationPatch[currFieldName] = translationResult;
+        translationPatch = { ...translationPatch, ...translationResult };
       }
     }
 
+    console.log(translationPatch);
     // finally, apply the translation patch to the object for the current locale
     await payload.update({
       id: documentId,
@@ -142,13 +128,19 @@ const translateDocument = async (
  * Translates a given field of a supported type.
  *
  * @param value
+ * @param targetValue
  * @param vendor
  * @param sourceLocale
  * @param targetLocale
+ *
+ * @returns Partial<TranslationPatch> the recursive translation patch for the given field
  */
-const translateField = async (args: TranslationArgs) => {
+const translateField = async (
+  args: TranslationArgs
+): Promise<undefined | Record<string, any>> => {
   const {
     value,
+    targetValue,
     field,
     vendor,
     sourceLocale,
@@ -156,35 +148,106 @@ const translateField = async (args: TranslationArgs) => {
     overwriteExistingTranslations,
   } = args;
 
+  console.log(args);
+
   // if this is a directly translatable field, return the vendor's result
+  // wrapped in an object of the field's name to be directly applied as
+  // partial translation patch
   if (translatableFieldTypes.includes(field.type)) {
     if (!value) return undefined;
+    if (targetValue && !overwriteExistingTranslations) {
+      return { [(field as any).name]: targetValue };
+    }
+
+    let translation;
 
     switch (field.type) {
       case "text":
-        return await translateTextField({ ...args, text: value });
+        translation = await translateTextField({ ...args, text: value });
+        break;
       case "textarea":
-        return await translateTextareaField({
+        translation = await translateTextareaField({
           ...args,
           text: value,
         });
+        break;
       case "richText":
-        return await translateRichtextField({
+        translation = await translateRichtextField({
           ...args,
           node: value,
         });
+        break;
       default:
         // this should never happen as the switch-cases fully matches `translatableFields`
         throw new Error(
           `Undefined 'translatableField': ${field.type} - aborting!`
         );
     }
+
+    return {
+      [field.name]: translation,
+    };
   }
   //
-  if (traversableFieldTypes.includes(field.type)) {
+  else if (traversableFieldTypes.includes(field.type)) {
+    let translationPatch: Record<string, any> = {};
+
     switch (field.type) {
       case "tabs":
-        return "";
+        // For tabs we need to distinguish between named and unnamed tabs
+        // because named tabs have their values namespaced while unnamed tabs
+        // put their value on top-level
+        for (const tab of field.tabs) {
+          if ((tab as any)["name"]) {
+            // This is a named tab.
+            // Descend into the namespace and translate fields.
+            const tabName = (tab as any)["name"];
+            let tabTranslationResult = {};
+            for (const tabField of tab.fields) {
+              const fieldName = (tabField as any).name ?? undefined;
+              const tabFieldTranslationResult = await translateField({
+                ...args,
+                field: tabField,
+                value: fieldName ? value[tabName][fieldName] : value[tabName],
+                targetValue: fieldName
+                  ? targetValue[tabName][fieldName]
+                  : targetValue[tabName],
+              });
+
+              if (tabFieldTranslationResult) {
+                tabTranslationResult = {
+                  ...tabTranslationResult,
+                  ...tabFieldTranslationResult,
+                };
+              }
+            }
+            translationPatch = {
+              ...translationPatch,
+              [tabName]: tabTranslationResult,
+            };
+          } else {
+            // This is an unnamed tab.
+            for (const tabField of tab.fields) {
+              const fieldName = (tabField as any)["name"] ?? undefined;
+              const tabFieldTranslationResult = await translateField({
+                ...args,
+                field: tabField,
+                value: fieldName ? value[fieldName] : value,
+                targetValue: fieldName ? targetValue[fieldName] : targetValue,
+              });
+
+              if (tabFieldTranslationResult) {
+                translationPatch = {
+                  ...translationPatch,
+                  ...tabFieldTranslationResult,
+                };
+              }
+            }
+          }
+        }
+        console.log("patch");
+        console.log(translationPatch);
+        return translationPatch;
 
       default:
         // this should never happen as the switch-cases fully matches `traversableFields`
@@ -193,6 +256,10 @@ const translateField = async (args: TranslationArgs) => {
         );
         break;
     }
+  } else {
+    // The field is neither translatable, nor traversable.
+    // This means it might be something like a number or date field and no operation is required.
+    // It might also indicate an unsupported field type which is not handled.
   }
 };
 

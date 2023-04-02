@@ -2,7 +2,7 @@ import { buildConfig } from "payload/config";
 import autoI18nPlugin, { DeeplVendor } from "../../..";
 import { CapitalTranslator } from "../../vendors/capitaltranslator";
 
-export const simpleCollectionSlug: string = "simpleCollection";
+export const nestedCollectionSlug: string = "nestedCollection";
 export default buildConfig({
   admin: {
     disable: true,
@@ -18,19 +18,42 @@ export default buildConfig({
 
   collections: [
     {
-      slug: simpleCollectionSlug,
-
+      slug: nestedCollectionSlug,
       fields: [
         {
-          name: "text",
-          type: "text",
-          localized: true,
-        },
-        {
-          name: "richText",
-          type: "richText",
-          localized: true,
-          required: false,
+          type: "tabs",
+          tabs: [
+            /**
+             * Test with one named and one unnamed tab
+             */
+            {
+              name: "named_tab",
+              label: "named_tab_label",
+              fields: [
+                {
+                  name: "named_tab_localized_text",
+                  type: "text",
+                  localized: true,
+                },
+                {
+                  name: "named_tab_static_number",
+                  type: "number",
+                  localized: false,
+                },
+              ],
+            },
+            {
+              // note that unnamed tabs need to have a label set
+              label: "Unnamed Tab",
+              fields: [
+                {
+                  name: "unnamed_tab_localized_text",
+                  type: "text",
+                  localized: true,
+                },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -38,7 +61,7 @@ export default buildConfig({
 
   plugins: [
     autoI18nPlugin({
-      collections: ["simpleCollection"],
+      collections: [nestedCollectionSlug],
       vendor: new CapitalTranslator(),
       overwriteTranslations: false,
       auth: () => true,

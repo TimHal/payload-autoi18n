@@ -59,6 +59,7 @@ export interface TranslationVendor {
 
 export type TranslationArgs = {
   value: any;
+  targetValue: any;
   field: Field;
   vendor: TranslationVendor;
   sourceLocale: locale;
