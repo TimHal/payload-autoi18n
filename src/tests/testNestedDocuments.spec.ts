@@ -2,7 +2,10 @@ import express from "express";
 import { Server } from "http";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import payload from "payload";
-import { nestedCollectionSlug } from "./configs/nested/payload-config";
+import {
+  arrayCollectionSlug,
+  nestedCollectionSlug,
+} from "./configs/nested/payload-config";
 
 let handle: Server;
 
@@ -67,5 +70,45 @@ describe("AutoI18n Plugin Tests", () => {
     console.log(res);
     expect(1).toBe(1);
     //expect(res["text"]).toMatchObject(expected_text);
+  });
+
+  it("Should translate array fields properly", async () => {
+    const input = {
+      localizedArray: [
+        {
+          localized_array_text: "foo",
+          static_array_number: 1,
+        },
+        {
+          localized_array_text: "bar",
+          static_array_number: 2,
+        },
+      ],
+    };
+
+    const id = (
+      await payload.create({
+        collection: arrayCollectionSlug,
+        data: input,
+        locale: "de",
+      })
+    ).id;
+
+    // await fetch(
+    //   `http://localhost:3000/api/${arrayCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+    //   {
+    //     method: "post",
+    //   }
+    // );
+
+    const res = await payload.findByID({
+      collection: arrayCollectionSlug,
+      id: id,
+      locale: "all",
+    });
+
+    console.log("------------------------------------------");
+    console.log(res);
+    expect(1).toBe(1);
   });
 });

@@ -3,6 +3,7 @@ import autoI18nPlugin, { DeeplVendor } from "../../..";
 import { CapitalTranslator } from "../../vendors/capitaltranslator";
 
 export const nestedCollectionSlug: string = "nestedCollection";
+export const arrayCollectionSlug: string = "arrayCollection";
 export default buildConfig({
   admin: {
     disable: true,
@@ -57,11 +58,31 @@ export default buildConfig({
         },
       ],
     },
+    {
+      slug: arrayCollectionSlug,
+      fields: [
+        {
+          type: "array",
+          name: "localizedArray",
+          fields: [
+            {
+              type: "text",
+              name: "localized_array_text",
+              localized: true,
+            },
+            {
+              type: "number",
+              name: "static_array_number",
+            },
+          ],
+        },
+      ],
+    },
   ],
 
   plugins: [
     autoI18nPlugin({
-      collections: [nestedCollectionSlug],
+      collections: [nestedCollectionSlug, arrayCollectionSlug],
       vendor: new CapitalTranslator(),
       overwriteTranslations: false,
       auth: () => true,

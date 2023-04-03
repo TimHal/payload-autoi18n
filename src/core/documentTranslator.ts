@@ -155,6 +155,8 @@ const translateField = async (
   // partial translation patch
   if (translatableFieldTypes.includes(field.type)) {
     if (!value) return undefined;
+    // only consider localized fields
+    if (!(field as any)["localized"]) return value;
     if (targetValue && !overwriteExistingTranslations) {
       return { [(field as any).name]: targetValue };
     }
@@ -245,16 +247,50 @@ const translateField = async (
             }
           }
         }
-        console.log("patch");
-        console.log(translationPatch);
         return translationPatch;
+
+      case "array":
+        // For arrays it is required to translate each entry.
+        // The contents are name-spaced under the array's name.
+        // The type of value is expected to be an array (or undefined)
+        const arrayName = field.name;
+
+        const fn = async (value: any, index: number) => {
+          // Index is needed to get the corresponding element in the target array
+          let elementTranslation = {};
+          const targetDocumentElementValue =
+            (targetValue[arrayName] as any[])[index] ?? undefined;
+
+          for (const _field of field.fields) {
+            const _fieldPatch = await translateField({
+              ...args,
+              value: value,
+              targetValue: (targetValue[arrayName] as any[]) ?? [],
+            });
+          }
+        };
+
+        // Apply the same translation config to all elements
+        const arrayTranslationResult = Promise.all(
+          (value[arrayName] as any[]).map(fn)
+        );
+
+        let arrayFieldTranslationPatch;
+
+        break;
+
+      case "group":
+      case "collapsible":
+      case "row":
+        // Groups, Rows and collapsibles do not really change the structure, just namespace the
+        // values in question.
+        break;
 
       default:
         // this should never happen as the switch-cases fully matches `traversableFields`
         throw new Error(
           `Undefined 'traversableFields': ${field.type} - aborting!`
         );
-        break;
     }
   } else {
     // The field is neither translatable, nor traversable.
