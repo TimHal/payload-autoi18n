@@ -94,21 +94,22 @@ describe("AutoI18n Plugin Tests", () => {
       })
     ).id;
 
-    // await fetch(
-    //   `http://localhost:3000/api/${arrayCollectionSlug}/${id}/translate?locale=de&id=${id}`,
-    //   {
-    //     method: "post",
-    //   }
-    // );
+    await fetch(
+      `http://localhost:3000/api/${arrayCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+      {
+        method: "post",
+      }
+    );
 
     const res = await payload.findByID({
       collection: arrayCollectionSlug,
       id: id,
+      depth: 3,
       locale: "all",
     });
 
     console.log("------------------------------------------");
-    console.log(res);
+    res.localizedArray.map(console.log);
     expect(1).toBe(1);
   });
 });

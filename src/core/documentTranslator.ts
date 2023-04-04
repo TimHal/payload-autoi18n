@@ -150,10 +150,13 @@ const translateField = async (
 
   console.log(args);
 
-  // if this is a directly translatable field, return the vendor's result
-  // wrapped in an object of the field's name to be directly applied as
-  // partial translation patch
+  if ((field as any)["name"] && ["id", "_id"].includes((field as any)["name"]))
+    return { [(field as any)["name"]]: value };
+
   if (translatableFieldTypes.includes(field.type)) {
+    // if this is a directly translatable field, return the vendor's result
+    // wrapped in an object of the field's name to be directly applied as
+    // partial translation patch
     if (!value) return undefined;
     // only consider localized fields
     if (!(field as any)["localized"]) return value;
@@ -255,34 +258,60 @@ const translateField = async (
         // The type of value is expected to be an array (or undefined)
         const arrayName = field.name;
 
+        // We will use this element-based translation function inside a
+        // concurrent map.
         const fn = async (value: any, index: number) => {
           // Index is needed to get the corresponding element in the target array
           let elementTranslation = {};
           const targetDocumentElementValue =
-            (targetValue[arrayName] as any[])[index] ?? undefined;
+            (targetValue as any[])[index] ?? undefined;
 
           for (const _field of field.fields) {
-            const _fieldPatch = await translateField({
+            const _fieldName = (_field as any)["name"] ?? undefined;
+
+            const _fieldTranslationResult = await translateField({
               ...args,
-              value: value,
-              targetValue: (targetValue[arrayName] as any[]) ?? [],
+              field: _field,
+              value: _fieldName ? value[_fieldName] : value,
+              targetValue:
+                _fieldName && targetDocumentElementValue
+                  ? targetDocumentElementValue[_fieldName]
+                  : targetDocumentElementValue,
             });
+
+            if (_fieldTranslationResult) {
+              elementTranslation = {
+                ...elementTranslation,
+                ..._fieldTranslationResult,
+              };
+            }
           }
+
+          // use the target value (current value in target language)
+          // as base translation to retain things like id-fields
+          return {
+            ...targetDocumentElementValue,
+            ...elementTranslation,
+          };
         };
 
         // Apply the same translation config to all elements
-        const arrayTranslationResult = Promise.all(
-          (value[arrayName] as any[]).map(fn)
+        const arrayTranslationResult = await Promise.all(
+          (value as any[]).map(fn)
         );
 
-        let arrayFieldTranslationPatch;
+        return { [arrayName]: arrayTranslationResult };
 
         break;
 
       case "group":
+        // Groups are moving all sub-fields into a common namespace, just descend into that namespace
+
+        break;
+
       case "collapsible":
       case "row":
-        // Groups, Rows and collapsibles do not really change the structure, just namespace the
+        // Rows and collapsibles do not really change the structure, just namespace the
         // values in question.
         break;
 
