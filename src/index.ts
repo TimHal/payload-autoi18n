@@ -37,9 +37,7 @@ const autoI18nPlugin =
         if (!collectionConfig) {
           throw new Error(`Unable to resolve config for ${collection.slug}`);
         }
-        console.log(
-          `Setting up translation endpoint for ${collectionConfig.slug}`
-        );
+
         const translationEndpoint = {
           path: "/:id/translate",
           method: "post",

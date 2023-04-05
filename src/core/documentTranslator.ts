@@ -113,7 +113,6 @@ const translateDocument = async (
       }
     }
 
-    console.log(translationPatch);
     // finally, apply the translation patch to the object for the current locale
     await payload.update({
       id: documentId,
@@ -147,8 +146,6 @@ const translateField = async (
     targetLocale,
     overwriteExistingTranslations,
   } = args;
-
-  console.log(args);
 
   if ((field as any)["name"] && ["id", "_id"].includes((field as any)["name"]))
     return { [(field as any)["name"]]: value };
@@ -302,18 +299,55 @@ const translateField = async (
 
         return { [arrayName]: arrayTranslationResult };
 
-        break;
-
       case "group":
         // Groups are moving all sub-fields into a common namespace, just descend into that namespace
+        let groupPatch = {};
+        const groupName = field.name;
 
-        break;
+        for (const _field of field.fields) {
+          const _fieldName = (_field as any)["name"] ?? undefined;
+
+          const fieldTranslationResult = await translateField({
+            ...args,
+            value: _fieldName ? value[_fieldName] : value,
+            targetValue: _fieldName ? targetValue[_fieldName] : targetValue,
+            field: _field,
+          });
+
+          if (fieldTranslationResult) {
+            groupPatch = {
+              ...groupPatch,
+              ...fieldTranslationResult,
+            };
+          }
+        }
+
+        return { [groupName]: groupPatch };
 
       case "collapsible":
       case "row":
         // Rows and collapsibles do not really change the structure, just namespace the
         // values in question.
-        break;
+        let representationalPatch = {};
+        for (const _field of field.fields) {
+          const _fieldName = (_field as any)["name"] ?? undefined;
+
+          const fieldTranslationResult = await translateField({
+            ...args,
+            value: _fieldName ? value[_fieldName] : value,
+            targetValue: _fieldName ? targetValue[_fieldName] : targetValue,
+            field: _field,
+          });
+
+          if (fieldTranslationResult) {
+            representationalPatch = {
+              ...representationalPatch,
+              ...fieldTranslationResult,
+            };
+          }
+        }
+
+        return representationalPatch;
 
       default:
         // this should never happen as the switch-cases fully matches `traversableFields`

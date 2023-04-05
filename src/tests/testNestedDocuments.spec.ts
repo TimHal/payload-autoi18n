@@ -5,6 +5,8 @@ import payload from "payload";
 import {
   arrayCollectionSlug,
   nestedCollectionSlug,
+  representationalCollectionSlug,
+  structuralCollectionSlug,
 } from "./configs/nested/payload-config";
 
 let handle: Server;
@@ -67,9 +69,15 @@ describe("AutoI18n Plugin Tests", () => {
       locale: "all",
     });
 
-    console.log(res);
-    expect(1).toBe(1);
-    //expect(res["text"]).toMatchObject(expected_text);
+    expect(res.named_tab).toMatchObject({
+      named_tab_localized_text: { de: "foo", en: "FOO", es: "FOO" },
+      named_tab_static_number: 42,
+    });
+    expect(res.unnamed_tab_localized_text).toMatchObject({
+      de: "bar",
+      en: "BAR",
+      es: "BAR",
+    });
   });
 
   it("Should translate array fields properly", async () => {
@@ -104,12 +112,95 @@ describe("AutoI18n Plugin Tests", () => {
     const res = await payload.findByID({
       collection: arrayCollectionSlug,
       id: id,
-      depth: 3,
       locale: "all",
     });
 
-    console.log("------------------------------------------");
-    res.localizedArray.map(console.log);
-    expect(1).toBe(1);
+    expect(res.localizedArray.length).toBe(2);
+    expect(res.localizedArray[0]).toMatchObject({
+      localized_array_text: { de: "foo", en: "FOO", es: "FOO" },
+      static_array_number: 1,
+    });
+    expect(res.localizedArray[1]).toMatchObject({
+      localized_array_text: { de: "bar", en: "BAR", es: "BAR" },
+      static_array_number: 2,
+    });
+  });
+
+  it("Should translate grouped fields correctly", async () => {
+    const input = {
+      locals: {
+        group_localized_text: "foo",
+        group_static_text: "static",
+      },
+      nonlocals: {
+        group_nonlocal_static_text: "static",
+      },
+    };
+
+    const id = (
+      await payload.create({
+        collection: structuralCollectionSlug,
+        data: input,
+        locale: "de",
+      })
+    ).id;
+
+    await fetch(
+      `http://localhost:3000/api/${structuralCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+      {
+        method: "post",
+      }
+    );
+
+    const res = await payload.findByID({
+      collection: structuralCollectionSlug,
+      id: id,
+      locale: "all",
+    });
+
+    expect(res.locals).toMatchObject({
+      group_localized_text: { de: "foo", en: "FOO", es: "FOO" },
+      group_static_text: "static",
+    });
+    expect(res.nonlocals).toMatchObject({
+      group_nonlocal_static_text: "static",
+    });
+  });
+
+  it("Should translate representational fields (row, collapse) correctly", async () => {
+    const input = {
+      row_localized_text: "foo",
+      row_static_number: 1,
+      collapsible_localized_text: "bar",
+      collapsible_static_text: "static",
+    };
+
+    const id = (
+      await payload.create({
+        collection: representationalCollectionSlug,
+        data: input,
+        locale: "de",
+      })
+    ).id;
+
+    await fetch(
+      `http://localhost:3000/api/${representationalCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+      {
+        method: "post",
+      }
+    );
+
+    const res = await payload.findByID({
+      collection: representationalCollectionSlug,
+      id: id,
+      locale: "all",
+    });
+    console.log(res);
+    expect(res).toMatchObject({
+      row_localized_text: { de: "foo", en: "FOO", es: "FOO" },
+      row_static_number: 1,
+      collapsible_localized_text: { de: "bar", en: "BAR", es: "BAR" },
+      collapsible_static_text: "static",
+    });
   });
 });
