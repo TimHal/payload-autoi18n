@@ -10,7 +10,6 @@ import {
 } from "../types";
 import payload from "payload";
 import handleAndRethrow from "./errorHandler";
-import { Field } from "payload/dist/fields/config/types";
 
 /**
  * Recursively translates a whole document by traversing the field hierarchy.
