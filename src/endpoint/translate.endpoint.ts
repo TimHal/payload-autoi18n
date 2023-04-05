@@ -1,4 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import { PayloadHandler } from "payload/config";
 import { CollectionConfig } from "payload/dist/collections/config/types";
 import { PayloadRequest } from "payload/dist/types";
 import translateDocument from "../core/documentTranslator";
@@ -22,7 +23,15 @@ type RequestParams = {
   targetLocale: locale | locale[];
 };
 
-const translationHandlerFactory = (
+const translationHandlerFactory: (
+  args: AutoI18nConfig & {
+    implementedVendor: TranslationVendor;
+    config: CollectionConfig;
+    collectionSlug: string;
+    locales: string[];
+    defaultLocale: string;
+  }
+) => PayloadHandler = (
   args: AutoI18nConfig & {
     implementedVendor: TranslationVendor;
     config: CollectionConfig;
