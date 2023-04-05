@@ -27,21 +27,22 @@ export type OverrideConfig = {
 export type AutoI18nConfig = {
   // The translation service/vendor to use. Defaults to `deepl`
   vendor: TranslationVendor;
-
-  // If set to `true` will override the entries
+  // If set to `true` will override present values for `targetlocale`
   overwriteTranslations: boolean;
-
   // If set to `true` will auto-translate after each document creation or update using payload hooks
   synchronize: boolean;
-
   // alias the payload locales to country-codes for your vendor
   localeAlias?: Record<string, string>;
-
   //
   auth: (req: PayloadRequest) => boolean;
-
   collections?: Array<string>;
   overrides?: Partial<OverrideConfig>;
+  endpointConfig?: Partial<RESTConfig>;
+};
+
+export type RESTConfig = {
+  omitEndpoints: boolean;
+  path: string;
 };
 
 export type VendorConfig = {
