@@ -137,15 +137,7 @@ const translateDocument = async (
 const translateField = async (
   args: TranslationArgs
 ): Promise<undefined | Record<string, any>> => {
-  const {
-    value,
-    targetValue,
-    field,
-    vendor,
-    sourceLocale,
-    targetLocale,
-    overwriteExistingTranslations,
-  } = args;
+  const { value, targetValue, field, overwriteExistingTranslations } = args;
 
   if ((field as any)["name"] && ["id", "_id"].includes((field as any)["name"]))
     return { [(field as any)["name"]]: value };
