@@ -10,6 +10,7 @@ import {
 } from "./configs/nested/payload-config";
 
 let handle: Server;
+let url: string;
 
 describe("AutoI18n Plugin Tests", () => {
   beforeAll(async () => {
@@ -26,6 +27,9 @@ describe("AutoI18n Plugin Tests", () => {
       express: app,
       mongoURL: uri,
     });
+    const { port } = handle.address() as any;
+    url = `http://localhost:${port}${payload.getAPIURL()}`;
+    console.log(url);
   });
 
   afterAll(() => {
@@ -57,7 +61,7 @@ describe("AutoI18n Plugin Tests", () => {
 
     // query the translation endpoint
     await fetch(
-      `http://localhost:3000/api/${nestedCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+      `${url}/${nestedCollectionSlug}/${id}/translate?locale=de&id=${id}`,
       {
         method: "post",
       }
@@ -103,7 +107,7 @@ describe("AutoI18n Plugin Tests", () => {
     ).id;
 
     await fetch(
-      `http://localhost:3000/api/${arrayCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+      `${url}/${arrayCollectionSlug}/${id}/translate?locale=de&id=${id}`,
       {
         method: "post",
       }
@@ -146,7 +150,7 @@ describe("AutoI18n Plugin Tests", () => {
     ).id;
 
     await fetch(
-      `http://localhost:3000/api/${structuralCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+      `${url}/${structuralCollectionSlug}/${id}/translate?locale=de&id=${id}`,
       {
         method: "post",
       }
@@ -184,7 +188,7 @@ describe("AutoI18n Plugin Tests", () => {
     ).id;
 
     await fetch(
-      `http://localhost:3000/api/${representationalCollectionSlug}/${id}/translate?locale=de&id=${id}`,
+      `${url}/${representationalCollectionSlug}/${id}/translate?locale=de&id=${id}`,
       {
         method: "post",
       }
@@ -195,7 +199,7 @@ describe("AutoI18n Plugin Tests", () => {
       id: id,
       locale: "all",
     });
-    console.log(res);
+
     expect(res).toMatchObject({
       row_localized_text: { de: "foo", en: "FOO", es: "FOO" },
       row_static_number: 1,

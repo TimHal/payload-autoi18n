@@ -1,6 +1,7 @@
 import { NextFunction, Response, Request } from "express";
 import { Config } from "payload/config";
 import translationHandlerFactory from "./endpoint/translate.endpoint";
+import translateHookFactory from "./hook/translate.hook";
 import { AutoI18nConfig } from "./types";
 import { DeeplVendor } from "./vendors/deepl";
 
@@ -30,33 +31,81 @@ const autoI18nPlugin =
 
     const mergedConfig = {
       ...config,
-      collections: config.collections?.map((collection) => {
-        const collectionConfig = config.collections?.find(
-          (c) => c.slug === collection.slug
-        );
-        if (!collectionConfig) {
-          throw new Error(`Unable to resolve config for ${collection.slug}`);
-        }
+      collections: config.collections
+        ?.map((collection) => {
+          /**
+           * Create the default REST endpoints for document translations.
+           */
+          const collectionConfig = config.collections?.find(
+            (c) => c.slug === collection.slug
+          );
+          if (!collectionConfig) {
+            throw new Error(`Unable to resolve config for ${collection.slug}`);
+          }
+          if (
+            (_incomingAutoI18nConfig.endpointConfig?.omitEndpoints ?? false) ===
+            true
+          ) {
+            return {
+              ...collection,
+            };
+          }
+          const translationEndpoint = {
+            path:
+              _incomingAutoI18nConfig.endpointConfig?.path ?? "/:id/translate",
+            method: "post",
+            root: false,
+            handler: translationHandlerFactory({
+              ..._incomingAutoI18nConfig,
+              config: collectionConfig,
+              implementedVendor: _incomingAutoI18nConfig.vendor ?? _deepl,
+              collectionSlug: collection.slug,
+              locales: locales,
+              defaultLocale: defaultLocale,
+            }),
+          };
 
-        const translationEndpoint = {
-          path: "/:id/translate",
-          method: "post",
-          root: false,
-          handler: translationHandlerFactory({
+          return {
+            ...collection,
+            endpoints: [...(collection.endpoints ?? []), translationEndpoint],
+          };
+        })
+        .map((collection) => {
+          /**
+           * Create synchronization hooks for the collections
+           */
+          const collectionConfig = config.collections?.find(
+            (c) => c.slug === collection.slug
+          );
+          if (!collectionConfig) {
+            throw new Error(`Unable to resolve config for ${collection.slug}`);
+          }
+
+          if ((_incomingAutoI18nConfig.synchronize ?? false) !== true) {
+            return {
+              ...collection,
+            };
+          }
+          const synchronizationHook = translateHookFactory({
             ..._incomingAutoI18nConfig,
             config: collectionConfig,
             implementedVendor: _incomingAutoI18nConfig.vendor ?? _deepl,
             collectionSlug: collection.slug,
             locales: locales,
             defaultLocale: defaultLocale,
-          }),
-        };
+          });
 
-        return {
-          ...collection,
-          endpoints: [...(collection.endpoints ?? []), translationEndpoint],
-        };
-      }),
+          return {
+            ...collection,
+            hooks: {
+              ...collection.hooks,
+              afterChange: [
+                ...(collection.hooks?.afterChange ?? []),
+                synchronizationHook,
+              ],
+            },
+          };
+        }),
     };
 
     return mergedConfig;
