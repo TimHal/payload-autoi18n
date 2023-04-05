@@ -12,7 +12,7 @@ import {
 let handle: Server;
 let url: string;
 
-describe("AutoI18n Plugin Tests", () => {
+describe("AutoI18n - Nested Documents", () => {
   beforeAll(async () => {
     process.env["PAYLOAD_CONFIG_PATH"] =
       "src/tests/configs/nested/payload-config.ts";

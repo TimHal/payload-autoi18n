@@ -86,6 +86,7 @@ const autoI18nPlugin =
               ...collection,
             };
           }
+
           const synchronizationHook = translateHookFactory({
             ..._incomingAutoI18nConfig,
             config: collectionConfig,

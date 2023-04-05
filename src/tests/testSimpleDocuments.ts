@@ -6,7 +6,7 @@ import { simpleCollectionSlug } from "./configs/simple/payload-config";
 
 let handle: Server;
 
-describe("AutoI18n Plugin Tests", () => {
+describe("AutoI18n - Simple Documents", () => {
   beforeAll(async () => {
     process.env["PAYLOAD_CONFIG_PATH"] =
       "src/tests/configs/simple/payload-config.ts";

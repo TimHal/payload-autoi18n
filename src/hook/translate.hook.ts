@@ -18,6 +18,11 @@ const translateHookFactory: (
     const { locale } = req;
     const { id } = doc;
 
+    // Important! Leaving this check out will result in circular updates,
+    // at least if overwriteTranslations is also true.
+    // This is a serious limitation of this plugin and hooks at large.
+    if (req.payloadAPI === "local") return doc;
+
     if (!id) return doc;
 
     // Not able to choose the correct source locale in this case.
