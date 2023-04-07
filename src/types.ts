@@ -33,8 +33,7 @@ export type AutoI18nConfig = {
   synchronize: boolean;
   // alias the payload locales to country-codes for your vendor
   localeAlias?: Record<string, string>;
-  //
-  auth: (req: PayloadRequest) => boolean;
+
   collections?: Array<string>;
   overrides?: Partial<OverrideConfig>;
   endpointConfig?: Partial<RESTConfig>;
