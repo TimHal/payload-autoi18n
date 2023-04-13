@@ -163,7 +163,6 @@ export default buildConfig({
       ],
       vendor: new CapitalTranslator(),
       overwriteTranslations: false,
-      auth: () => true,
       synchronize: false,
     }),
   ],

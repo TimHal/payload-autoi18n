@@ -73,7 +73,6 @@ export default buildConfig({
       collections: ["simpleCollection"],
       vendor: new CapitalTranslator(),
       overwriteTranslations: false,
-      auth: () => true,
       synchronize: false,
     }),
   ],

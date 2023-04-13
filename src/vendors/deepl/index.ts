@@ -1,7 +1,11 @@
 import { TranslationVendor } from "../../types";
 
 export class DeeplVendor implements TranslationVendor {
-  constructor() {}
+  private token: string;
+
+  constructor(args: { token: string }) {
+    this.token = args.token;
+  }
 
   public async translate(
     text: string,
