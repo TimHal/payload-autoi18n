@@ -1,7 +1,9 @@
 import { NextFunction, Response, Request } from "express";
 import { Config } from "payload/config";
-import translationHandlerFactory from "./endpoint/translate.endpoint";
-import translateHookFactory from "./hook/translate.hook";
+import { Field } from "payload/dist/fields/config/types";
+import TranslateDocumentComponent from "./components/translateDocument.component";
+import translationHandlerFactory from "./endpoints/translate.endpoint";
+import translateHookFactory from "./hooks/translate.hook";
 import { AutoI18nConfig } from "./types";
 import { DeeplVendor } from "./vendors/deepl";
 
@@ -27,7 +29,6 @@ const autoI18nPlugin =
 
     const locales = config.localization.locales;
     const defaultLocale = config.localization.defaultLocale;
-    const _deepl = new DeeplVendor();
 
     const mergedConfig = {
       ...config,
@@ -58,7 +59,7 @@ const autoI18nPlugin =
             handler: translationHandlerFactory({
               ..._incomingAutoI18nConfig,
               config: collectionConfig,
-              implementedVendor: _incomingAutoI18nConfig.vendor ?? _deepl,
+              implementedVendor: _incomingAutoI18nConfig.vendor,
               collectionSlug: collection.slug,
               locales: locales,
               defaultLocale: defaultLocale,
@@ -68,6 +69,36 @@ const autoI18nPlugin =
           return {
             ...collection,
             endpoints: [...(collection.endpoints ?? []), translationEndpoint],
+          };
+        })
+        .map((collection) => {
+          /**
+           * Add `translate` fields to the documents
+           */
+          const collectionConfig = config.collections?.find(
+            (c) => c.slug === collection.slug
+          );
+          if (!collectionConfig) {
+            throw new Error(`Unable to resolve config for ${collection.slug}`);
+          }
+
+          const translateField: Field = {
+            name: "translate_field",
+            type: "ui",
+            label: "Translate this Document.",
+            admin: {
+              position: "sidebar",
+              components: {
+                Field: TranslateDocumentComponent,
+              },
+            },
+          };
+          return {
+            ...collection,
+            fields: {
+              ...collection.fields,
+              translateField,
+            },
           };
         })
         .map((collection) => {
@@ -90,7 +121,7 @@ const autoI18nPlugin =
           const synchronizationHook = translateHookFactory({
             ..._incomingAutoI18nConfig,
             config: collectionConfig,
-            implementedVendor: _incomingAutoI18nConfig.vendor ?? _deepl,
+            implementedVendor: _incomingAutoI18nConfig.vendor,
             collectionSlug: collection.slug,
             locales: locales,
             defaultLocale: defaultLocale,
