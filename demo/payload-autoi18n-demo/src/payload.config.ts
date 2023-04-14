@@ -29,7 +29,6 @@ export default buildConfig({
   },
   plugins: [
     autoI18nPlugin({
-      auth: () => true,
       overwriteTranslations: false,
       synchronize: false,
       vendor: new DeeplVendor(process.env["DEEPL_API_TOKEN"]),
