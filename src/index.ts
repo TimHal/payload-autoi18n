@@ -1,16 +1,16 @@
 import { NextFunction, Response, Request } from "express";
 import { Config } from "payload/config";
 import { Field } from "payload/dist/fields/config/types";
-import TranslateDocumentComponent from "./components/translateDocument.component";
 import translationHandlerFactory from "./endpoints/translate.endpoint";
 import translateHookFactory from "./hooks/translate.hook";
 import { AutoI18nConfig } from "./types";
 import { DeeplVendor } from "./vendors/deepl";
 
 /**
- * Export default vendors
+ * Export default vendors and meta information
  */
-export { DeeplVendor };
+// export class DeeplVendor;
+export { Meta };
 
 /**
  *
@@ -73,36 +73,6 @@ const autoI18nPlugin =
         })
         .map((collection) => {
           /**
-           * Add `translate` fields to the documents
-           */
-          const collectionConfig = config.collections?.find(
-            (c) => c.slug === collection.slug
-          );
-          if (!collectionConfig) {
-            throw new Error(`Unable to resolve config for ${collection.slug}`);
-          }
-
-          const translateField: Field = {
-            name: "translate_field",
-            type: "ui",
-            label: "Translate this Document.",
-            admin: {
-              position: "sidebar",
-              components: {
-                Field: TranslateDocumentComponent,
-              },
-            },
-          };
-          return {
-            ...collection,
-            fields: {
-              ...collection.fields,
-              translateField,
-            },
-          };
-        })
-        .map((collection) => {
-          /**
            * Create synchronization hooks for the collections
            */
           const collectionConfig = config.collections?.find(
@@ -142,5 +112,14 @@ const autoI18nPlugin =
 
     return mergedConfig;
   };
+
+const Meta = {
+  pluginName: "auto-i18n",
+  pluginId: "",
+  author: "Tim Hallyburton",
+  version: "0.1.0",
+  compatiblePayloadVersions: [">1.6.*"],
+  incompatibleWith: [],
+};
 
 export default autoI18nPlugin;

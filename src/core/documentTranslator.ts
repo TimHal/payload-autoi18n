@@ -169,6 +169,8 @@ const translateField = async (
           ...args,
           node: value,
         });
+        console.log("richtext translation result");
+        console.log(translation);
         break;
       default:
         // this should never happen as the switch-cases fully matches `translatableFields`
@@ -369,7 +371,7 @@ const translateTextareaField = async (
     args.targetLocale
   );
 };
-const translateRichtextField = async (
+const translateRichtextField: any = async (
   args: TranslationArgs & { node: any }
 ) => {
   const {
@@ -382,7 +384,38 @@ const translateRichtextField = async (
     overwriteExistingTranslations,
   } = args;
 
-  return node;
+  if (typeof node === "string") {
+    return await args.vendor.translate(
+      node,
+      args.sourceLocale,
+      args.targetLocale
+    );
+  }
+
+  if (Array.isArray(node)) {
+    const fpTranslate = async (el: any) =>
+      await translateRichtextField({ ...args, node: el });
+    return await Promise.all(node.map(fpTranslate));
+  }
+
+  if (node["text"]) {
+    return {
+      ...node,
+      text: await translateRichtextField({ ...args, node: node["text"] }),
+    };
+  }
+
+  if (node["children"]) {
+    const fpTranslate = async (el: string) =>
+      await translateRichtextField({ ...args, node: el });
+    const translatedChildren = await Promise.all(
+      (node["children"] ?? []).map(fpTranslate)
+    );
+    return {
+      ...node,
+      children: translatedChildren,
+    };
+  }
 };
 
 export default translateDocument;
