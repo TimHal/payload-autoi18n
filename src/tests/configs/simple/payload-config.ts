@@ -1,5 +1,5 @@
 import { buildConfig } from "payload/config";
-import autoI18nPlugin, { DeeplVendor } from "../../..";
+import autoI18nPlugin from "../../..";
 import { CapitalTranslator } from "../../vendors/capitaltranslator";
 
 export const simpleCollectionSlug: string = "simpleCollection";
