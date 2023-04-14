@@ -5,6 +5,8 @@ import Users from "./collections/Users";
 
 // import the autoI18nConfig
 import autoI18nPlugin from "payload-autoi18n";
+import { DeeplVendor } from "payload-autoi18n/vendors/deepl";
+
 import Examples from "./collections/Examples";
 import Nested from "./collections/NestedExamples";
 
@@ -30,7 +32,7 @@ export default buildConfig({
       auth: () => true,
       overwriteTranslations: false,
       synchronize: false,
-      vendor: "deepl",
+      vendor: new DeeplVendor(process.env["DEEPL_API_TOKEN"]),
     }),
   ],
 });
