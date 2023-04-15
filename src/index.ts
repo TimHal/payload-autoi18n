@@ -4,6 +4,20 @@ import translateHookFactory from "./hooks/translate.hook";
 import { AutoI18nConfig } from "./types";
 
 /**
+ * Payload-autoi18n Plugin (Technical Preview)
+ *
+ * Author: Tim Hallyburton
+ * License: GPLv3
+ *
+ * This plugin adds automatic translation capabilities to your payload project using a vendor of your choice.
+ * It is tested for simple and nested documents, using a mock- translator and the free DeepL API.
+ * For more information and example usage see the `demo` folder in this repository.
+ *
+ * Please note: This plugin is not authored, endorsed or approved by the payload project,
+ * associated developers or legal entities.
+ */
+
+/**
  * Export default vendors and meta information
  */
 // export class DeeplVendor;
@@ -125,6 +139,10 @@ const autoI18nPlugin =
     return mergedConfig;
   };
 
+/**
+ * This meta information is not really needed right now, but it would be useful to establish such meta information
+ * for the upcoming plugin ecosystem. Will discuss this with the other contributors soon.
+ */
 const Meta = {
   pluginName: "auto-i18n",
   pluginId: "",

@@ -22,14 +22,16 @@ import handleAndRethrow from "./errorHandler";
  * Note: Instead of passing the document directly, it is easier to specify the slug and id
  * separately, as the collection might describe a custom id (with a custom name to it).
  *
- * @param documentId
- * @param documentSlug
- * @param collectionConfig
- * @param vendor
- * @param sourceLocale
- * @param targetLocale
- * @param overwriteExistingTranslations
- * @param excludePaths
+ * @param documentId - the id of the document to translate
+ * @param documentSlug - the documents slug
+ * @param collectionConfig - the corresponding collection config
+ * @param vendor - the instanciated translation vendor
+ * @param sourceLocale - the base/source language for the translation
+ * @param targetLocale - the target language for the translation
+ * @param localeAlias - if the `locales` do not match the capabilities of your vendor because they are named
+ *                      differently (you might have the locale 'English' but your vendor expects 'en-US')
+ * @param overwriteExistingTranslations - boolean to enable/disable overwriting of non-empty target fields
+ * @param excludePaths - you can omit the translation of certain fields, this option is currently unused
  *
  * @returns the updated document
  */
@@ -44,7 +46,8 @@ const translateDocument = async (
   overwriteExistingTranslations: boolean,
   excludePaths?: string[]
 ) => {
-  // this object keeps the records to update in the final step
+  // this object keeps the records to update in the final step. A translation patch is a partial
+  // document for the given target locale.
   let translationPatch: Record<string, any> = {};
 
   // get the original doc. `showHiddenFields = true` is a sensible default, because undesired
@@ -157,6 +160,12 @@ const translateField = async (
     let translation;
 
     switch (field.type) {
+      /**
+       * All of those fields are 'primitive' and can be directly translated by the vendor.
+       * In the case of richText some unrolling/recursion is needed (see below) but all of those
+       * fields have text content that can be directly patched and does not need to be further iterated
+       * like arrays or groups.
+       */
       case "text":
         translation = await translateTextField({
           ...args,
