@@ -1,10 +1,7 @@
-import { NextFunction, Response, Request } from "express";
 import { Config } from "payload/config";
-import { Field } from "payload/dist/fields/config/types";
 import translationHandlerFactory from "./endpoints/translate.endpoint";
 import translateHookFactory from "./hooks/translate.hook";
 import { AutoI18nConfig } from "./types";
-import { DeeplVendor } from "./vendors/deepl";
 
 /**
  * Export default vendors and meta information
@@ -29,6 +26,19 @@ const autoI18nPlugin =
 
     const locales = config.localization.locales;
     const defaultLocale = config.localization.defaultLocale;
+
+    /**
+     * Prepare the locale aliasing. All explicit alias entries are untouched while
+     * any ommited locales are aliased to their identity. This makes the implementation
+     * down the line more straight forward as it does not require to distinguish
+     * between aliased and un-aliased locales.
+     */
+    const localeAlias = _incomingAutoI18nConfig.localeAlias ?? {};
+    for (const locale of locales) {
+      if (locale in localeAlias) continue;
+
+      localeAlias[locale] = locale;
+    }
 
     const mergedConfig = {
       ...config,
@@ -62,6 +72,7 @@ const autoI18nPlugin =
               implementedVendor: _incomingAutoI18nConfig.vendor,
               collectionSlug: collection.slug,
               locales: locales,
+              localeAlias: localeAlias,
               defaultLocale: defaultLocale,
             }),
           };
@@ -94,6 +105,7 @@ const autoI18nPlugin =
             implementedVendor: _incomingAutoI18nConfig.vendor,
             collectionSlug: collection.slug,
             locales: locales,
+            localeAlias: localeAlias,
             defaultLocale: defaultLocale,
           });
 

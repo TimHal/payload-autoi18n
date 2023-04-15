@@ -40,6 +40,7 @@ const translateDocument = async (
   vendor: TranslationVendor,
   sourceLocale: locale,
   targetLocale: locale | locale[],
+  localeAlias: Record<string, string>,
   overwriteExistingTranslations: boolean,
   excludePaths?: string[]
 ) => {
@@ -103,6 +104,7 @@ const translateDocument = async (
         vendor: vendor,
         sourceLocale: sourceLocale,
         targetLocale: locale,
+        localeAlias: localeAlias,
         overwriteExistingTranslations: overwriteExistingTranslations,
       });
 
@@ -156,21 +158,28 @@ const translateField = async (
 
     switch (field.type) {
       case "text":
-        translation = await translateTextField({ ...args, text: value });
+        translation = await translateTextField({
+          ...args,
+          sourceLocale: args.localeAlias[args.sourceLocale],
+          targetLocale: args.localeAlias[args.targetLocale],
+          text: value,
+        });
         break;
       case "textarea":
         translation = await translateTextareaField({
           ...args,
+          sourceLocale: args.localeAlias[args.sourceLocale],
+          targetLocale: args.localeAlias[args.targetLocale],
           text: value,
         });
         break;
       case "richText":
         translation = await translateRichtextField({
           ...args,
+          sourceLocale: args.localeAlias[args.sourceLocale],
+          targetLocale: args.localeAlias[args.targetLocale],
           node: value,
         });
-        console.log("richtext translation result");
-        console.log(translation);
         break;
       default:
         // this should never happen as the switch-cases fully matches `translatableFields`
@@ -385,6 +394,7 @@ const translateRichtextField: any = async (
   } = args;
 
   if (typeof node === "string") {
+    // No need to alias here as the incoming locales already are the correct ones
     return await args.vendor.translate(
       node,
       args.sourceLocale,
