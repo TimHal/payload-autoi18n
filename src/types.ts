@@ -64,5 +64,6 @@ export type TranslationArgs = {
   vendor: TranslationVendor;
   sourceLocale: locale;
   targetLocale: locale;
+  localeAlias: Record<string, string>;
   overwriteExistingTranslations: boolean;
 };
