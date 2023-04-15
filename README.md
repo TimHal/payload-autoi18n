@@ -25,6 +25,9 @@ Coming soon.
 - **Documentation**
   - [ ] Plugin Setup and options explained
 - **Testing and Code quality**
+  - Document all options of the plugin.
+- **Backlog**
+  - Allow users to provide custom strategies for translating custom/nested fields 
 
 ## Support and Feedback
 Best way to get in touch is the payloadcms [discord server](https://discord.com/invite/r6sCXqVk3v), alternatively open an issue or discussion on this repo.
