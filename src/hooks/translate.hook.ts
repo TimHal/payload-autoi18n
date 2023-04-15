@@ -11,6 +11,7 @@ const translateHookFactory: (
     config: CollectionConfig;
     collectionSlug: string;
     locales: string[];
+    localeAlias: Record<string, string>;
     defaultLocale: string;
   }
 ) => AfterChangeHook = (args) => {
@@ -38,6 +39,7 @@ const translateHookFactory: (
       args.implementedVendor,
       locale as string,
       args.locales,
+      args.localeAlias,
       args.overwriteTranslations,
       []
     );

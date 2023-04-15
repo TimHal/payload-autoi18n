@@ -29,6 +29,7 @@ const translationHandlerFactory: (
     config: CollectionConfig;
     collectionSlug: string;
     locales: string[];
+    localeAlias: Record<string, string>;
     defaultLocale: string;
   }
 ) => PayloadHandler = (
@@ -37,6 +38,7 @@ const translationHandlerFactory: (
     config: CollectionConfig;
     collectionSlug: string;
     locales: string[];
+    localeAlias: Record<string, string>;
     defaultLocale: string;
   }
 ) => {
@@ -57,6 +59,7 @@ const translationHandlerFactory: (
       args.implementedVendor,
       sourceLocale as string,
       args.locales,
+      args.localeAlias,
       args.overwriteTranslations,
       []
     );
