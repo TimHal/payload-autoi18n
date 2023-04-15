@@ -5,78 +5,16 @@ import {
   TranslationFailedError,
   VendorSetupError,
 } from "../../core/errors";
+import {
+  SUPPORTED_SOURCE_LOCALES,
+  SUPPORTED_TARGET_LOCALES,
+} from "./constants";
+import qs from "qs";
 import { TranslationVendor } from "../../types";
 
 export type ApiType = "free" | "pro";
 export class DeeplVendor implements TranslationVendor {
   private apiUrl;
-
-  static SUPPORTED_SOURCE_LOCALES = [
-    "BG",
-    "CS",
-    "DA",
-    "DE",
-    "EL",
-    "EN",
-    "ES",
-    "ET",
-    "FI",
-    "FR",
-    "HU",
-    "ID",
-    "IT",
-    "JA",
-    "KO",
-    "LT",
-    "LV",
-    "NB",
-    "NL",
-    "PL",
-    "PT",
-    "RO",
-    "RU",
-    "SK",
-    "SL",
-    "SV",
-    "TR",
-    "UK",
-    "ZH",
-  ];
-  static SUPPORTED_TARGET_LOCALES = [
-    "BG",
-    "CS",
-    "DA",
-    "DE",
-    "EL",
-    "EN",
-    "EN-GB",
-    "EN-US",
-    "ES",
-    "ET",
-    "FI",
-    "FR",
-    "HU",
-    "ID",
-    "IT",
-    "JA",
-    "KO",
-    "LT",
-    "LV",
-    "NB",
-    "NL",
-    "PL",
-    "PT",
-    "PT-BR",
-    "PT-PT",
-    "RO",
-    "RU",
-    "SK",
-    "SL",
-    "SV",
-    "TR",
-    "UK",
-    "ZH",
-  ];
 
   public constructor(private token: string, private apiType: ApiType = "free") {
     if (!this.token) {
@@ -95,19 +33,29 @@ export class DeeplVendor implements TranslationVendor {
   ): Promise<string> {
     this.checkLocales(sourceLocale, targetLocale);
 
+    console.log(this.apiUrl);
     const res = await fetch(this.apiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `DeepL-Auth-Key ${this.token}`,
+        Accept: "application/json, text/plain",
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify({ text: text }),
+      body: qs.stringify({ text: text, target_lang: targetLocale }),
     });
 
     if (res.status !== 200) {
       throw new TranslationFailedError(`Translation failed for ${text}`);
     }
 
-    return res.json();
+    const json = await res.json();
+    const translationResult = json["translations"][0]["text"];
+    if (!translationResult) {
+      throw new TranslationFailedError(
+        `Vendor did not produce a meaningful translation for ${text}`
+      );
+    }
+    return translationResult;
   }
 
   private checkLocales(sourceLocale: string, targetLocale: string): void {
@@ -118,9 +66,9 @@ export class DeeplVendor implements TranslationVendor {
      *
      * It still makes sense to warn the user about the unsupported locale.
      */
-    if (!DeeplVendor.SUPPORTED_SOURCE_LOCALES.includes(sourceLocale)) {
-      payload.logger.console.warn(
-        `[${Meta.pluginName}] Unsupported source locale for deepl vendor ${sourceLocale}\
+    if (!SUPPORTED_SOURCE_LOCALES.includes(sourceLocale)) {
+      payload.logger.warn(
+        `[${Meta.pluginName}] Unsupported source locale ${sourceLocale} for deepl vendor ${sourceLocale}\
         \n\tTry setting up an appropriate 'localeAlias' in your plugin conf.`
       );
     }
@@ -129,7 +77,7 @@ export class DeeplVendor implements TranslationVendor {
      * This case is more serious. The API will not be able to handle our request, it is best
      * to throw an error and not attempt any translation, as it might yield undesired results.
      */
-    if (!DeeplVendor.SUPPORTED_TARGET_LOCALES.includes(targetLocale)) {
+    if (!SUPPORTED_TARGET_LOCALES.includes(targetLocale)) {
       throw new UnsupportedLocaleError(
         `Unsupported target locale ${targetLocale} - aborting.`
       );
