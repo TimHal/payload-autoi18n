@@ -2,11 +2,9 @@ import { buildConfig } from "payload/config";
 import path from "path";
 // import Examples from './collections/Examples';
 import Users from "./collections/Users";
-
 // import the autoI18nConfig
 import autoI18nPlugin from "payload-autoi18n";
 import { DeeplVendor } from "payload-autoi18n/vendors/deepl";
-
 import Examples from "./collections/Examples";
 import Nested from "./collections/NestedExamples";
 
@@ -29,9 +27,10 @@ export default buildConfig({
   },
   plugins: [
     autoI18nPlugin({
-      overwriteTranslations: false,
+      overwriteTranslations: true,
       synchronize: false,
-      vendor: new DeeplVendor(process.env["DEEPL_API_TOKEN"]),
+      localeAlias: { en: "EN", de: "DE" },
+      // vendor: new DeeplVendor("<YOUR FREE API KEY HERE>"),
     }),
   ],
 });
