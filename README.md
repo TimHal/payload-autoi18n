@@ -21,6 +21,7 @@ Coming soon.
 - **Vendors**
   - [x] Deepl
   - [ ] Google Translate
+  - [ ] Liongate (?)
   - [ ] ChatGPT
 - **Documentation**
   - [ ] Plugin Setup and options explained
