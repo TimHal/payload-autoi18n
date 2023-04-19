@@ -28,7 +28,7 @@ export { Meta };
  * @param _incomingAutoI18nConfig
  * @returns
  */
-const autoI18nPlugin =
+const BackpopulatePlugin =
   (_incomingAutoI18nConfig: AutoI18nConfig) =>
   (config: Config): Config => {
     /**
@@ -144,12 +144,12 @@ const autoI18nPlugin =
  * for the upcoming plugin ecosystem. Will discuss this with the other contributors soon.
  */
 const Meta = {
-  pluginName: "auto-i18n",
+  pluginName: "payload-backpop",
   pluginId: "",
   author: "Tim Hallyburton",
   version: "0.1.0",
-  compatiblePayloadVersions: [">1.6.*"],
+  compatiblePayloadVersions: [">1.7.*"],
   incompatibleWith: [],
 };
 
-export default autoI18nPlugin;
+export default BackpopulatePlugin;
